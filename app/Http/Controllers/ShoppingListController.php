@@ -34,10 +34,15 @@ class ShoppingListController extends Controller
      */
     public function update(Request $request, $shoppingListId)
     {
+        $validated = $request->validate([
+            'budget' => 'numeric|between:0,9999999999.99',
+            'total' => 'numeric|between:0,9999999999.99',
+        ]);
+
         try {
             $shoppingList = ShoppingList::findOrFail($shoppingListId);
-            $shoppingList->budget = $request->budget ?? $shoppingList->budget;
-            $shoppingList->total = $request->total ?? $shoppingList->total;
+            $shoppingList->budget = $validated['budget'] ?? $shoppingList->budget;
+            $shoppingList->total = $validated['total'] ?? $shoppingList->total;
             $shoppingList->save();
         } catch (ModelNotFoundException $exception) {
             return back()->withError($exception->getMessage())->withInput();

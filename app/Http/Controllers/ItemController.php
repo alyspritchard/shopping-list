@@ -18,9 +18,13 @@ class ItemController extends Controller
      */
     public function store(Request $request, int $shoppingListId)
     {
+        $validated = $request->validate([
+            'name' => 'required|unique:App\Models\Item,name|max:255',
+        ]);
+
         try {
             $shoppingList = ShoppingList::findOrFail($shoppingListId);
-            $name = $request->name;
+            $name = $validated['name'];
             $item = $shoppingList->items()->firstOrNew(['name' => $name]);
             $item->save();
         } catch (ModelNotFoundException $exception) {
@@ -40,11 +44,15 @@ class ItemController extends Controller
      */
     public function update(Request $request, $shoppingListId, $itemId)
     {
+        $validated = $request->validate([
+            'is_purchased' => 'boolean',
+        ]);
+
         try {
             $item = Item::findOrFail($itemId);
 
             if ($item->shopping_list_id == $shoppingListId) {
-                $item->is_purchased = $request->is_purchased;
+                $item->is_purchased = $validated['is_purchased'] ?? $item->is_purchased;
                 $item->save();
             }
         } catch (ModelNotFoundException $exception) {
