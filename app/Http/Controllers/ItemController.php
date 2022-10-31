@@ -18,16 +18,16 @@ class ItemController extends Controller
      */
     public function store(Request $request, int $shoppingListId)
     {
-        $shoppingList = ShoppingList::find($shoppingListId);
-
-        if ($shoppingList) {
+        try {
+            $shoppingList = ShoppingList::findOrFail($shoppingListId);
             $name = $request->name;
             $item = $shoppingList->items()->firstOrNew(['name' => $name]);
             $item->save();
-            return redirect()->route('dashboard');
+        } catch (ModelNotFoundException $exception) {
+            return back()->withError($exception->getMessage())->withInput();
         }
 
-        return 'Shopping List not found';
+        return redirect()->route('dashboard');
     }
 
     /**
@@ -40,15 +40,18 @@ class ItemController extends Controller
      */
     public function update(Request $request, $shoppingListId, $itemId)
     {
-        $item = Item::find($itemId);
+        try {
+            $item = Item::findOrFail($itemId);
 
-        if ($item && $item->shopping_list_id == $shoppingListId) {
-            $item->is_purchased = $request->is_purchased;
-            $item->save();
-            return redirect()->route('dashboard');
+            if ($item->shopping_list_id == $shoppingListId) {
+                $item->is_purchased = $request->is_purchased;
+                $item->save();
+            }
+        } catch (ModelNotFoundException $exception) {
+            return back()->withError($exception->getMessage())->withInput();
         }
 
-        return "Item not found.";
+        return redirect()->route('dashboard');
     }
 
     /**
@@ -60,13 +63,16 @@ class ItemController extends Controller
      */
     public function destroy($shoppingListId, $itemId)
     {
-        $item = Item::find($itemId);
+        try {
+            $item = Item::findorFail($itemId);
 
-        if ($item && $item->shopping_list_id == $shoppingListId) {
-            $item->delete();
-            return redirect()->route('dashboard');
+            if ($item->shopping_list_id == $shoppingListId) {
+                $item->delete();
+            }
+        } catch (ModelNotFoundException $exception) {
+            return back()->withError($exception->getMessage())->withInput();
         }
 
-        return "Item not found";
+        return redirect()->route('dashboard');
     }
 }

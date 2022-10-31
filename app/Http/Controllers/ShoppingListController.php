@@ -34,16 +34,16 @@ class ShoppingListController extends Controller
      */
     public function update(Request $request, $shoppingListId)
     {
-        $shoppingList = ShoppingList::find($shoppingListId);
-
-        if ($shoppingList) {
+        try {
+            $shoppingList = ShoppingList::findOrFail($shoppingListId);
             $shoppingList->budget = $request->budget ?? $shoppingList->budget;
             $shoppingList->total = $request->total ?? $shoppingList->total;
             $shoppingList->save();
-            return redirect()->route('dashboard');
+        } catch (ModelNotFoundException $exception) {
+            return back()->withError($exception->getMessage())->withInput();
         }
 
-        return "Shopping List not found.";
+        return redirect()->route('dashboard');
     }
 
     /**
@@ -54,12 +54,13 @@ class ShoppingListController extends Controller
      */
     public function destroy($shoppingListId)
     {
-        $shoppingList = ShoppingList::find($shoppingListId);
-
-        if ($shoppingList) {
+        try {
+            $shoppingList = ShoppingList::findOrFail($shoppingListId);
             $shoppingList->delete();
-            return redirect()->route('dashboard');
+        } catch (ModelNotFoundException $exception) {
+            return back()->withError($exception->getMessage())->withInput();
         }
 
-        return "Shopping List not found";    }
+        return redirect()->route('dashboard');
+    }
 }
