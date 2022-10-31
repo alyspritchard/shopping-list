@@ -37,8 +37,8 @@ class ShoppingListController extends Controller
         $shoppingList = ShoppingList::find($shoppingListId);
 
         if ($shoppingList) {
-            $shoppingList->budget = $request->budget;
-            $shoppingList->total = $request->total;
+            $shoppingList->budget = $request->budget ?? $shoppingList->budget;
+            $shoppingList->total = $request->total ?? $shoppingList->total;
             $shoppingList->save();
             return redirect()->route('dashboard');
         }
